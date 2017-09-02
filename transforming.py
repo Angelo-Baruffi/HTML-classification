@@ -7,11 +7,12 @@ Transformação do dicionário de dados em uma tabela de features
 """
 from bs4 import BeautifulSoup
 import pandas as pd 
+global tag 
 
 df= pd.DataFrame(data={'soup':[], 'class':[] } )
 
-features = ['title', 'number_of_link', 'number_of_images', 'h1', 'hx_headers',
-             'number_of_mailto', 'number_of_list', 'number_of_words',
+features = ['title', 'number_of_link', 'number_of_images',  'hx_headers',
+              'number_of_list', 'number_of_words',
              'h1_text', 'h2_text', 'h3_text' ,   ]
 
 for key in data.keys():
@@ -20,23 +21,49 @@ for key in data.keys():
 
 
 
-title = lambda x: x.title
+count_all_tag = lambda x: pd.DataFrame(x.findAll(tag))
 
-number_of_link = lambda x: x.title
-h1 = lambda x: pd.DataFrame(x.findAll('h1'))
-h2 = lambda x: pd.DataFrame(x.findAll('h2'))
-a_href = lambda x: pd.DataFrame(x.findAll('a'))
-
-def get_text(x):
+def title(x):
    try:
-       return x.title.get_text() 
+       return x.title.get_text()
+   except AttributeError:
+       return ''
+
+def find_all_tag(x):
+   global tag
+   try:
+       element = ''
+       for i in x.find_all(tag):
+           
+           element= element +  ' ' + ''.join( i.text)
+           
+       return element
    except AttributeError:
        return ''
 
 df['title']=  pd.DataFrame(df['soup'] ).applymap(title)
-df['title']=  pd.DataFrame(df['title'] ).applymap(get_text)
-df['links']=  pd.DataFrame(df['soup'] ).applymap(title)
-df['h_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1)['soup']) ]
 
+tag = 'h1'
+df['h1']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
+df['h1_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+
+tag = 'h2'
+df['h2']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
+df['h2_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+
+tag = 'h3'
+df['h3']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
+df['h3_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+
+tag = 'a'
+df['a']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
+df['a_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+
+tag = 'img'
+df['img_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+
+tag = 'li'
+df['li']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
+df['li_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
 
     
