@@ -9,39 +9,36 @@ from bs4 import BeautifulSoup
 import pandas as pd 
 global tag 
 
-df= pd.DataFrame(data={'soup':[], 'class':[] } )
-
-features = ['title', 'number_of_link', 'number_of_images',  'hx_headers',
-              'number_of_list', 'number_of_words',
-             'h1_text', 'h2_text', 'h3_text' ,   ]
-
-for key in data.keys():
-    df= df.append(pd.DataFrame( data={'soup': data[key], 'class':key } ))
-    
-
-
-
 count_all_tag = lambda x: pd.DataFrame(x.findAll(tag))
-
-def title(x):
-   try:
-       return x.title.get_text()
-   except AttributeError:
-       return ''
 
 def find_all_tag(x):
    global tag
    try:
        element = ''
        for i in x.find_all(tag):
-           
            element= element +  ' ' + ''.join( i.text)
-           
        return element
    except AttributeError:
        return ''
 
-df['title']=  pd.DataFrame(df['soup'] ).applymap(title)
+def all_text(x):
+    try:
+        temp = x.text
+        return temp[len(x.p.text):]
+    except AttributeError:
+       return ''
+
+df= pd.DataFrame(data={'soup':[], 'class':[] } )
+for key in data.keys():
+    df= df.append(pd.DataFrame( data={'soup': data[key], 'class':key } ))
+    
+
+df['all_text'] =  pd.DataFrame(df['soup'] ).applymap(all_text)
+df['all_text_count']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
+
+tag = 'title'
+df['title']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
+
 
 tag = 'h1'
 df['h1']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
@@ -66,4 +63,4 @@ tag = 'li'
 df['li']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
 df['li_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
 
-    
+
