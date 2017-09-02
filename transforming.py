@@ -27,6 +27,13 @@ def all_text(x):
         return temp[len(x.p.text):]
     except AttributeError:
        return ''
+   
+def count_all_text(x):
+    try:
+        temp = x.text
+        return len( temp[len(x.p.text):].split() )
+    except AttributeError:
+       return ''
 
 df= pd.DataFrame(data={'soup':[], 'class':[] } )
 for key in data.keys():
@@ -34,7 +41,7 @@ for key in data.keys():
     
 
 df['all_text'] =  pd.DataFrame(df['soup'] ).applymap(all_text)
-df['all_text_count']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
+df['all_text_count']=  pd.DataFrame(df['soup'] ).applymap(count_all_text)
 
 tag = 'title'
 df['title']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
