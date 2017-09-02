@@ -45,25 +45,25 @@ df['title']=  pd.DataFrame(df['soup'] ).applymap(title)
 
 tag = 'h1'
 df['h1']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-df['h1_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+df['h1_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
 
 tag = 'h2'
 df['h2']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-df['h2_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+df['h2_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
 
 tag = 'h3'
 df['h3']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-df['h3_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+df['h3_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
 
 tag = 'a'
 df['a']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-df['a_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+df['a_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
 
 tag = 'img'
-df['img_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+df['img_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
 
 tag = 'li'
 df['li']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-df['li_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(h1_count)['soup']) ]
+df['li_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
 
     
