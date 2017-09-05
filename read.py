@@ -24,3 +24,10 @@ def load():
         data[dirName] = f
     
     return data
+
+
+try:
+    data
+except NameError:
+    data = load()
+

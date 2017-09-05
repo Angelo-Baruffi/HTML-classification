@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from read import load
-
+from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 
@@ -17,16 +17,17 @@ from nltk.corpus import stopwords
 ## >>> <h1>Jeff Baggett</h1>.text
 ## Jeff Baggett
 
-try:
-    data
-except NameError:
-    data = load()
 
-element = 5
 soups = data['student'][:5]
 stemmer = SnowballStemmer("english") # Choose a language
 
-feature_text = np.array([soup.get_text() for soup in soups])
+text = np.array([soup.get_text() for soup in soups])
+
+df_part = df[:500] 
+
+text = df_part['title'][:]
+
+corpus = process_text(text)
 
 def process_text(texts):
     texts = texts.copy()
@@ -50,7 +51,7 @@ def process_text(texts):
         texts[index] = texts[index].replace('?',' ')
         texts[index] = texts[index].replace('#',' ')
 
-        
+       
         texts[index] = stemmer.stem(texts[index])
         for word in sw:
             texts[index] = texts[index].replace(''.join((' ',word,' ')), " ")
@@ -64,12 +65,7 @@ def process_text(texts):
                 splited.remove(word)
             else:
                 text = ''.join((text, word, ' '))
+            
         corpus = np.append(corpus,text)
+        
     return corpus
-
-corpus = process_text(feature_text)
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-vectorizer = TfidfVectorizer(stop_words='english')
-feature_text = vectorizer.fit_transform(corpus)
-

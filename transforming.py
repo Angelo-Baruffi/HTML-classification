@@ -76,6 +76,4 @@ df['hs']=  df['h1'] + ' ' + df['h2'] + ' ' + df['h3']
 df['hs_count']=  df['h1_count']+ df['h2_count']  + df['h3_count'] 
 
 
-hdf  = HDFStore('data.h5')
-hdf['df'] = df  # save 
 
