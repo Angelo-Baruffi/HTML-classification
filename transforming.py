@@ -6,8 +6,11 @@ Autores: Andrei Donati e Angelo Baruffi
 Transformação do dicionário de dados em uma tabela de features 
 """
 from bs4 import BeautifulSoup
+from pandas import HDFStore,DataFrame
 import pandas as pd 
+import sys
 global tag 
+sys.setrecursionlimit(10000)
 
 count_all_tag = lambda x: pd.DataFrame(x.findAll(tag))
 
@@ -46,7 +49,6 @@ df['all_text_count']=  pd.DataFrame(df['soup'] ).applymap(count_all_text)
 tag = 'title'
 df['title']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
 
-
 tag = 'h1'
 df['h1']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
 df['h1_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
@@ -70,4 +72,10 @@ tag = 'li'
 df['li']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
 df['li_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
 
+df['hs']=  df['h1'] + ' ' + df['h2'] + ' ' + df['h3']  
+df['hs_count']=  df['h1_count']+ df['h2_count']  + df['h3_count'] 
+
+
+hdf  = HDFStore('data.h5')
+hdf['df'] = df  # save 
 
