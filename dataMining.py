@@ -5,6 +5,7 @@ Created on Sat Sep 02 11:11:19 2017
 @author: Angelo Baruffi e Andrei Donati
 """
 import numpy as np
+import pandas as pd
 
 from read import load
 
@@ -22,7 +23,7 @@ except NameError:
     data = load()
 
 element = 5
-soups = data['student']
+soups = data['student'][:5]
 stemmer = SnowballStemmer("english") # Choose a language
 
 feature_text = np.array([soup.get_text() for soup in soups])
@@ -31,7 +32,7 @@ def process_text(texts):
     texts = texts.copy()
     sw = stopwords.words('english')    
     m = len(texts)
-    feature = []
+    corpus = np.array([])
     for index in xrange(m):
         texts[index] = texts[index].replace('\n',' ')
         texts[index] = texts[index].replace('\t',' ')
@@ -55,12 +56,20 @@ def process_text(texts):
             texts[index] = texts[index].replace(''.join((' ',word,' ')), " ")
         
         splited = texts[index].split()
+        text = ''
         for word in np.array(splited).copy():
             if(len(word)==1):
                 splited.remove(word)
             elif(word.isdigit()):
-                splited.remove(word)                
-        feature.append(splited)
-    return np.array(feature)
+                splited.remove(word)
+            else:
+                text = ''.join((text, word, ' '))
+        corpus = np.append(corpus,text)
+    return corpus
 
-feature_text = process_text(feature_text)
+corpus = process_text(feature_text)
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+vectorizer = TfidfVectorizer(stop_words='english')
+feature_text = vectorizer.fit_transform(corpus)
+
