@@ -9,17 +9,15 @@ import os.path
 
 df = pd.DataFrame()
 
-
-
-#%%
+#%% Leitura dos dados, já limpos
 fname= 'data.csv'
 
 if (os.path.isfile(fname)):
-    print('Opening file')
+    print('Arquivo já existente. Abrindo-o')
     df = pd.read_csv(fname, sep=';')    
 else:
-    print('Making file')
-    df, data= make_dataframe()
+    print('Arquivo não existente. Produzindo-o')
+    df, data= make_dataframe(fname)
 
 #del data
     

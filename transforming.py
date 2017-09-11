@@ -26,7 +26,9 @@ sys.setrecursionlimit(10000)
 #%% Loading data
 
 def load():
-    # Função para ler os arquivos
+    '''
+        Função que faz a leitura dos htmls de todas as pastas 
+    '''
     dirPath = '.\webkb' #Diretório com os dados
     classes = listdir(dirPath) # Lista de todas as classes
     
@@ -40,14 +42,13 @@ def load():
     return data
 
 
-
-
-
 #%%cleaning data
 
 def clean_texts(texts):
-    #Texts é um array de textos de cada amostra
-    # column you are working on
+    '''
+        Função para fazer a limpeza dos dados. Retira bad words, aplica o algoritmo "stemmer"
+        retira pontuações e numeros
+    '''
 
     df_ = pd.Series(texts)
     
@@ -78,6 +79,7 @@ def clean_texts(texts):
 count_all_tag = lambda x: pd.DataFrame(x.findAll(tag))
 
 def find_all_tag(x):
+   # Retorna o texto da tag selecionada
    global tag
    try:
        element = ''
@@ -88,6 +90,7 @@ def find_all_tag(x):
        return ''
 
 def all_text(x):
+    # Retorna todo o texto do documento
     try:
         temp = x.text
         return temp[len(x.p.text):]
@@ -95,13 +98,18 @@ def all_text(x):
        return ''
    
 def count_all_text(x):
+    # Retorna o número de palavras da tag selecionada
     try:
         temp = x.text
         return len( temp[len(x.p.text):].split() )
     except AttributeError:
        return ''
    
-def make_dataframe():
+def make_dataframe(fname):
+    '''
+        Função para fazer um pandas dataframe com de todos os documentos, com os textos já limpos 
+        Salva o dataframe em um csv com o nome fname
+    '''
     global tag
     
     try:
@@ -111,7 +119,6 @@ def make_dataframe():
   
     df= pd.DataFrame(data={'soup':[], 'class':[] } )
     
-    print('Cleaning text and making df')
     for key in data.keys():
         df= df.append(pd.DataFrame( data={'soup': data[key], 'class':key } ))
         
@@ -160,9 +167,7 @@ def make_dataframe():
     
     df2= df.iloc[:,df.columns!='soup']
     
-    df2.to_csv('data.csv', sep=';', encoding='utf-8')
-    
-    #del df2, data
+    df2.to_csv(fname, sep=';', encoding='utf-8')
     
     return df,data
     
