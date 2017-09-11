@@ -121,7 +121,6 @@ text = np.array([soup.get_text() for soup in soups])
 corpus = clean_texts(text)
 
 print("--- %s seconds ---" % (time.time() - start_time))
-
     
 #%%
     
