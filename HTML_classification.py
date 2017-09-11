@@ -7,9 +7,11 @@ Reading, cleaning and saving/reading the data
 from transforming import *
 import os.path
 
+df = pd.DataFrame()
 
-df= pd.DataFrame(data={'soup':[], 'class':[] } )
 
+
+#%%
 fname= 'data.csv'
 
 if (os.path.isfile(fname)):
@@ -17,5 +19,7 @@ if (os.path.isfile(fname)):
     df = pd.read_csv(fname, sep=';')    
 else:
     print('Making file')
-    df= make_dataframe(df)
+    df, data= make_dataframe()
+
+#del data
     

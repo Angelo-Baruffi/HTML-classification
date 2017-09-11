@@ -22,8 +22,11 @@ stemmer = SnowballStemmer("english") # Choose a language
 
 global tag
 sys.setrecursionlimit(10000)
-#%% Função para ler os arquivos
+
+#%% Loading data
+
 def load():
+    # Função para ler os arquivos
     dirPath = '.\webkb' #Diretório com os dados
     classes = listdir(dirPath) # Lista de todas as classes
     
@@ -36,57 +39,16 @@ def load():
     
     return data
 
-#%%
-def process_text(texts):
-    texts = texts.copy()
-    sw = stopwords.words('english')    
-    m = len(texts)
-    corpus = np.array([])
-    for index in xrange(m):
-        if index%100==0:
-            print(index)
-        texts.iloc[index] = texts.iloc[index].replace('\n',' ')
-        texts.iloc[index] = texts.iloc[index].replace('\t',' ')
-        texts.iloc[index] = texts.iloc[index].replace('.',' ')
-        texts.iloc[index] = texts.iloc[index].replace('\'',' ')
-        texts.iloc[index] = texts.iloc[index].replace(':',' ')
-        texts.iloc[index] = texts.iloc[index].replace(',',' ')
-        texts.iloc[index] = texts.iloc[index].replace('\"',' ')
-        texts.iloc[index] = texts.iloc[index].replace('(',' ')
-        texts.iloc[index] = texts.iloc[index].replace(')',' ')
-        texts.iloc[index] = texts.iloc[index].replace('\\',' ')
-        texts.iloc[index] = texts.iloc[index].replace('-',' ')
-        texts.iloc[index] = texts.iloc[index].replace('@',' ')
-        texts.iloc[index] = texts.iloc[index].replace('/',' ')
-        texts.iloc[index] = texts.iloc[index].replace(';',' ')
-        texts.iloc[index] = texts.iloc[index].replace('?',' ')
-        texts.iloc[index] = texts.iloc[index].replace('#',' ')
 
-       
-        texts.iloc[index] = stemmer.stem(texts.iloc[index])
-        for word in sw:
-            texts.iloc[index] = texts.iloc[index].replace(''.join((' ',word,' ')), " ")
-        
-        splited = texts.iloc[index].split()
-        text = ''
-        for word in np.array(splited).copy():
-            if(len(word)==1):
-                splited.remove(word)
-            elif(word.isdigit()):
-                splited.remove(word)
-            else:
-                text = ''.join((text, word, ' '))
-            
-        corpus = np.append(corpus,text)
-        
-    return corpus
+
+
+
+#%%cleaning data
 
 def clean_texts(texts):
     #Texts é um array de textos de cada amostra
     # column you are working on
-    minF = 0.05
-    maxF = 0.95   
-   
+
     df_ = pd.Series(texts)
     
     #stopword_set = set(stopwords.words("english"))
@@ -106,23 +68,12 @@ def clean_texts(texts):
     df_ = df_.str.join(' ')
     # join the cleaned words in a list
     return df_ #Retorna um pandas com uma coluna com o texto de cada amostra filtrado
-#%% Essa parte é apenas para teste da função clean_texts
-start_time = time.time()
-    
 
-try:
-    data
-except NameError:
-    data = load()
+  
 
-soups = data['student'][:100]
-
-text = np.array([soup.get_text() for soup in soups])
-corpus = clean_texts(text)
-
-print("--- %s seconds ---" % (time.time() - start_time))
-    
-#%%
+  
+  
+#%% making a data frame
     
 count_all_tag = lambda x: pd.DataFrame(x.findAll(tag))
 
@@ -149,14 +100,16 @@ def count_all_text(x):
         return len( temp[len(x.p.text):].split() )
     except AttributeError:
        return ''
-
-def make_dataframe(df):
-  
+   
+def make_dataframe():
+    global tag
+    
     try:
         data
     except NameError:
-        print('Loading data')
         data = load()
+  
+    df= pd.DataFrame(data={'soup':[], 'class':[] } )
     
     print('Cleaning text and making df')
     for key in data.keys():
@@ -164,34 +117,34 @@ def make_dataframe(df):
         
     
     df['all_text'] =  pd.DataFrame(df['soup'] ).applymap(all_text)
-    df['all_text'] = process_text(df.loc[:,'all_text'])
+    df['all_text'] = clean_texts(df.loc[:,'all_text'])
     df['all_text_count']=  pd.DataFrame(df['soup'] ).applymap(count_all_text)
     
     tag = 'title'
     df['title']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-    df['title'] = process_text(df.loc[:,'title'])
+    df['title'] = clean_texts(df.loc[:,'title'])
     df['title_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
     
     
     tag = 'h1'
     df['h1']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-    df['h1'] = process_text(df.loc[:,'h1'])
+    df['h1'] = clean_texts(df.loc[:,'h1'])
     df['h1_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
     
     
     tag = 'h2'
     df['h2']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-    df['h2'] = process_text(df.loc[:,'h2'])
+    df['h2'] = clean_texts(df.loc[:,'h2'])
     df['h2_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
     
     tag = 'h3'
     df['h3']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-    df['h3'] = process_text(df.loc[:,'h3'])
+    df['h3'] = clean_texts(df.loc[:,'h3'])
     df['h3_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
     
     tag = 'a'
     df['a']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-    df['a'] = process_text(df.loc[:,'a'])
+    df['a'] = clean_texts(df.loc[:,'a'])
     df['a_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
     
     tag = 'img'
@@ -199,7 +152,7 @@ def make_dataframe(df):
     
     tag = 'li'
     df['li']=  pd.DataFrame(df['soup'] ).applymap(find_all_tag)
-    df['li'] = process_text(df.loc[:,'li'])
+    df['li'] = clean_texts(df.loc[:,'li'])
     df['li_count']=  [len(i) for i in list(pd.DataFrame(df['soup'] ).applymap(count_all_tag)['soup']) ]
     
     df['hs']=  df['h1'] + ' ' + df['h2'] + ' ' + df['h3']  
@@ -209,9 +162,9 @@ def make_dataframe(df):
     
     df2.to_csv('data.csv', sep=';', encoding='utf-8')
     
-    del df2, data
+    #del df2, data
     
-    return df
+    return df,data
     
 
 
