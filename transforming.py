@@ -3,13 +3,14 @@
 
 Autores: Andrei Donati e Angelo Baruffi
 
-Transformação do dicionário de dados em uma tabela de features 
+Leitura dos dados e dos dados em uma tabela de features 
 """
 from bs4 import BeautifulSoup
 import pandas as pd 
 import numpy as np
 import sys
 import re
+import time
 
 from nltk.stem.snowball  import SnowballStemmer
 from nltk.corpus import stopwords
@@ -21,7 +22,21 @@ stemmer = SnowballStemmer("english") # Choose a language
 
 global tag
 sys.setrecursionlimit(10000)
+#%% Função para ler os arquivos
+def load():
+    dirPath = '.\webkb' #Diretório com os dados
+    classes = listdir(dirPath) # Lista de todas as classes
+    
+    data = dict()
+    for dirName in classes:
+        f = []
+        for (dirpath, dirnames, filenames) in walk(join(dirPath, dirName)):
+            f.extend([BeautifulSoup(open(join(dirpath, filename)).read()) for filename in filenames])
+        data[dirName] = f
+    
+    return data
 
+#%%
 def process_text(texts):
     texts = texts.copy()
     sw = stopwords.words('english')    
@@ -76,9 +91,12 @@ def clean_texts(texts):
     
     #stopword_set = set(stopwords.words("english"))
     
+    #Use stemmer funciton
+    df_ = df_.apply(lambda x: stemmer.stem(x))
+    
     # convert to lower case and split 
     df_ = df_.str.lower().str.split()
-    
+
 #    # remove stopwords
 #    df_ = df_.apply(lambda x: [item for item in x if item not in stopword_set])
     
@@ -88,8 +106,25 @@ def clean_texts(texts):
     df_ = df_.str.join(' ')
     # join the cleaned words in a list
     return df_ #Retorna um pandas com uma coluna com o texto de cada amostra filtrado
+#%% Essa parte é apenas para teste da função clean_texts
+start_time = time.time()
+    
 
+try:
+    data
+except NameError:
+    data = load()
 
+soups = data['student'][:100]
+
+text = np.array([soup.get_text() for soup in soups])
+corpus = clean_texts(text)
+
+print("--- %s seconds ---" % (time.time() - start_time))
+
+    
+#%%
+    
 count_all_tag = lambda x: pd.DataFrame(x.findAll(tag))
 
 def find_all_tag(x):
@@ -115,20 +150,6 @@ def count_all_text(x):
         return len( temp[len(x.p.text):].split() )
     except AttributeError:
        return ''
-
-def load():
-    dirPath = '.\webkb' #Diretório com os dados
-    classes = listdir(dirPath) # Lista de todas as classes
-    
-    data = dict()
-    for dirName in classes:
-        f = []
-        for (dirpath, dirnames, filenames) in walk(join(dirPath, dirName)):
-            f.extend([BeautifulSoup(open(join(dirpath, filename)).read()) for filename in filenames])
-        data[dirName] = f
-    
-    return data
-
 
 def make_dataframe(df):
   
