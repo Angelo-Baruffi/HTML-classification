@@ -8,6 +8,7 @@ Created on Sat Sep 02 11:11:19 2017
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
+
 vectorizer = TfidfVectorizer(stop_words='english')
 feature_text = vectorizer.fit_transform(corpus)
 idf = vectorizer.idf_
