@@ -21,7 +21,8 @@ if (os.path.isfile(fname)):
 else:
     print('Arquivo não existente. Produzindo-o')
     df, data= make_dataframe(fname)
-    df = df.copy().iloc[:,1:19]
+
+df = df.copy().iloc[:,1:19]
 
 # Visualizing the data 
 
@@ -30,11 +31,10 @@ print('Número total de exemplos: ' + str(len(df) ) )
 data = df.loc[:,'class'].groupby(df['class']).count()
 
 df.loc[:,'class'].groupby(df['class']).count().plot(kind='bar',
-      table=True, title='Número de exemplos para cada tipo', sort_columns=True)
+      table=True, title='Numero de exemplos para cada tipo', sort_columns=True)
 
 
-df.loc[:,'class'].groupby(df['class']).count().plot(kind='bar',
-      table=True, title='Número de exemplos para cada tipo', sort_columns=True)
+
 
 
 
