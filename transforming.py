@@ -17,6 +17,8 @@ from nltk.corpus import stopwords
 from os import listdir
 from os.path import join
 from os import walk
+#import os
+# os.chdir('c:\\Andrei\\HTML-classification')
 
 stemmer = SnowballStemmer("english") # Choose a language 
 
