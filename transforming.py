@@ -25,32 +25,36 @@ stemmer = SnowballStemmer("english") # Choose a language
 global tag
 sys.setrecursionlimit(10000)
 
-#%% Loading data
+# Loading data
 
 def load():
     '''
-        Função que faz a leitura dos htmls de todas as pastas 
+        Funcao que faz a leitura dos htmls de todas as pastas 
     '''
-    dirPath = 'teste' #Diretório com os dados
+    dirPath = 'webkb' #Diretorio com os dados
     classes = listdir(dirPath) # Lista de todas as classes
     
     data = dict()
+    titles = dict()
     for dirName in classes:
         f = []
+        t=[]
         for (dirpath, dirnames, filenames) in walk(join(dirPath, dirName)):
-            print(filename)
+            
             f.extend([BeautifulSoup(open(join(dirpath, filename)).read()) for filename in filenames])
+            t.extend([filename for filename in filenames])
         data[dirName] = f
+        titles[dirName] = t
     
-    return data
+    return data, titles
 
 
-#%%cleaning data
+#cleaning data
 
 def clean_texts(texts):
     '''
-        Função para fazer a limpeza dos dados. Retira bad words, aplica o algoritmo "stemmer"
-        retira pontuações e numeros
+        Funcao para fazer a limpeza dos dados. Retira bad words, aplica o algoritmo "stemmer"
+        retira pontuacoes e numeros
     '''
 
     df_ = pd.Series(texts)
@@ -77,7 +81,7 @@ def clean_texts(texts):
 
   
   
-#%% making a data frame
+# making a data frame
     
 count_all_tag = lambda x: pd.DataFrame(x.findAll(tag))
 
@@ -110,21 +114,29 @@ def count_all_text(x):
    
 def make_dataframe(fname):
     '''
-        Função para fazer um pandas dataframe com de todos os documentos, com os textos já limpos 
+        Funcao para fazer um pandas dataframe com de todos os documentos, com os textos já limpos 
         Salva o dataframe em um csv com o nome fname
     '''
+    
     global tag
     
     try:
         data
     except NameError:
-        data = load()
+        data, titles = load()
   
-    df= pd.DataFrame(data={'soup':[], 'class':[] } )
+    df= pd.DataFrame( data={'soup':[], 'class':[]  } )
+    
+    df_idx = pd.DataFrame( data={'title':[] } )
+    
     
     for key in data.keys():
         df= df.append(pd.DataFrame( data={'soup': data[key], 'class':key } ))
-        
+        df_idx= df_idx.append(pd.DataFrame( data={'title': titles[key] } ))
+    
+    
+    df_idx['idx']= list(xrange(df.shape[0]))
+    df['idx']= list(xrange(df.shape[0]))
     
     df['all_text'] =  pd.DataFrame(df['soup'] ).applymap(all_text)
     df['all_text'] = clean_texts(df.loc[:,'all_text'])
@@ -170,15 +182,17 @@ def make_dataframe(fname):
     
     df2= df.iloc[:,df.columns!='soup']
     
-    df2.to_csv(fname, sep=';', encoding='utf-8')
+    df2.to_csv(fname, sep=';', encoding='utf-8', index=False)
     
-    return df,data
+    fname= fname[:-4] + '_idx.csv'
+    
+    df_idx.to_csv(fname, sep=';', encoding='utf-8', index=False)
+    
+    return df, data
     
 
 
 
-    
-    
 
 
 

@@ -17,12 +17,12 @@ fname= 'data.csv'
 
 if (os.path.isfile(fname)):
     print('Arquivo já existente. Abrindo-o')
-    df = pd.read_csv(fname, sep=';')    
+    df = pd.read_csv(fname, sep=';') 
+    fname= fname[:-4] + '_idx.csv'
+    df_idx = pd.read_csv(fname, sep=';') 
 else:
     print('Arquivo não existente. Produzindo-o')
     df, data= make_dataframe(fname)
-
-df = df.copy().iloc[:,1:19]
 
 # Visualizing the data 
 
