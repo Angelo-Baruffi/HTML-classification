@@ -19,9 +19,12 @@ def find_nan(df, column):## Acha todos os index que possuem um nan como elemento
     return df_nan[df_nan==False].index
 
 #%% Pré definições
-min_samples = 4.0 #numero minimo de vezes que uma palavra deve aparecer para ser considerada nos calculos
-columns = ['hs',u'all_text_count', u'title_count', u'h1_count', u'h2_count', u'h3_count',
+min_samples = 5.0 #numero minimo de vezes que uma palavra deve aparecer para ser considerada nos calculos
+columns = ['all_text','h1',u'all_text_count', u'title_count', u'h1_count', u'h2_count', u'h3_count',
            u'a_count', u'img_count', u'li_count', u'hs_count']
+
+#Esta com um problema de quando tem mais de uma feature de texto.
+# Isso pq ele concatena as colunas por terem o mesmo valor
 
 #%% 
 index_to_keep = set(df.index)
@@ -34,7 +37,7 @@ for column in columns:
         corpus = df.loc[:,column].dropna()
         
         n_samples = df.shape[0]
-        vectorizer = TfidfVectorizer(stop_words='english', min_df=min_samples/n_samples)
+        vectorizer = TfidfVectorizer(stop_words='english', max_df=0.9,min_df=min_samples/n_samples)
         features_column = vectorizer.fit_transform(corpus)
         features_column = pd.DataFrame(features_column.toarray())
 
@@ -45,7 +48,7 @@ for column in columns:
         corpus = df.loc[:,column].fillna('')
         
         n_samples = df.shape[0]
-        vectorizer = TfidfVectorizer(stop_words='english', min_df=min_samples/n_samples)
+        vectorizer = TfidfVectorizer(stop_words='english',max_df=0.9 , min_df=min_samples/n_samples)
         features_column = vectorizer.fit_transform(corpus)
         features_column = pd.DataFrame(features_column.toarray())
         
@@ -64,7 +67,7 @@ labels = labels.loc[list(index_to_keep)]
 
 X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.4, random_state=0)
 
-cls = svm.SVC(C=10).fit(X_train, y_train)
+cls = svm.SVC(C=1).fit(X_train, y_train)
 y_pred = cls.predict(X_test)
 y_pred_train = cls.predict(X_train)
 acc_test = accuracy_score(y_test, y_pred)
