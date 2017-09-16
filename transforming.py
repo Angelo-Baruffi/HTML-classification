@@ -31,13 +31,14 @@ def load():
     '''
         Função que faz a leitura dos htmls de todas as pastas 
     '''
-    dirPath = '.\webkb' #Diretório com os dados
+    dirPath = 'teste' #Diretório com os dados
     classes = listdir(dirPath) # Lista de todas as classes
     
     data = dict()
     for dirName in classes:
         f = []
         for (dirpath, dirnames, filenames) in walk(join(dirPath, dirName)):
+            print(filename)
             f.extend([BeautifulSoup(open(join(dirpath, filename)).read()) for filename in filenames])
         data[dirName] = f
     
