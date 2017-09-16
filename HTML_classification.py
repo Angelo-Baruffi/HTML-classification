@@ -26,18 +26,5 @@ df = df.copy().iloc[:,1:19]
 
 # Visualizing the data 
 
-print('Número total de exemplos: ' + str(len(df) ) )
+print('Número total de exemplos: {}'.format(str(len(df))))
 
-data = df.loc[:,'class'].groupby(df['class']).count()
-
-df.loc[:,'class'].groupby(df['class']).count().plot(kind='bar',
-      table=True, title='Numero de exemplos para cada tipo', sort_columns=True)
-
-
-
-
-
-
-
-
-    

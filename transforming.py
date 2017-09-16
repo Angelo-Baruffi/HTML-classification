@@ -57,13 +57,13 @@ def clean_texts(texts):
     #stopword_set = set(stopwords.words("english"))
     
     #Use stemmer funciton
-    df_ = df_.apply(lambda x: stemmer.stem(x))
+    #df_ = df_.apply(lambda x: stemmer.stem(x))
     
     # convert to lower case and split 
     df_ = df_.str.lower().str.split()
 
-#    # remove stopwords
-#    df_ = df_.apply(lambda x: [item for item in x if item not in stopword_set])
+#    # apply stemmer
+    df_ = df_.apply(lambda x: [stemmer.stem(item) for item in x])
     
     # keep only words
     df_ = df_.apply(lambda x: [re.sub(r'[^a-zA-Z\s]', '', element, flags=re.IGNORECASE) for element in x])
