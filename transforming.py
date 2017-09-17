@@ -11,7 +11,9 @@ import numpy as np
 import sys
 import re
 import time
-
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
 from nltk.stem.snowball  import SnowballStemmer
 from nltk.corpus import stopwords
 from os import listdir
@@ -192,7 +194,24 @@ def make_dataframe(fname):
     
 
 
-
+def make_tfidf(df, test_size , min_df=0.2 , max_df=0.98):
+    
+    vectorizer = TfidfVectorizer(stop_words='english', min_df=min_df , max_df=max_df)
+    
+    corpus = df.loc[:,'all_text'].dropna()
+    
+    y =  df[df.loc[:,'all_text'].isnull()==False].loc[:,'class'] 
+    
+    X =  vectorizer.fit_transform(corpus)
+    
+    X = pd.DataFrame(X.toarray() )
+    
+    vocabulary = vectorizer.vocabulary_
+    
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+    
+    return X_train, X_test, y_train, y_test
 
 
 

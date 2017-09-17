@@ -4,6 +4,8 @@ Autores: Andrei Donati e Angelo Baruffi
 
 Reading, cleaning and saving/reading the data
 """
+print(__doc__)
+
 from transforming import *
 import os.path
 import matplotlib as mpl
@@ -34,10 +36,8 @@ df.loc[:,'class'].groupby(df['class']).count().plot(kind='bar',
       table=True, title='Numero de exemplos para cada tipo', sort_columns=True)
 
 
-
-
-
-
+test_size= 0.25
+X_train, X_test, y_train, y_test = make_tfidf(df, test_size,  min_df=0.08 , max_df=0.992)
 
 
     
