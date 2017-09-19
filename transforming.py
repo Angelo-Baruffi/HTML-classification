@@ -190,7 +190,7 @@ def make_dataframe(fname):
     
     df_idx.to_csv(fname, sep=';', encoding='utf-8', index=False)
     
-    return df, data
+    return df, data, df_idx
     
 
 

@@ -13,9 +13,10 @@ import matplotlib.pyplot as plt
 
 
 df = pd.DataFrame()
-
+df_idx = pd.DataFrame()
 # Leitura dos dados, já limpos
 fname= 'data.csv'
+fname= 'test.csv'
 
 if (os.path.isfile(fname)):
     print('Arquivo já existente. Abrindo-o')
@@ -24,7 +25,7 @@ if (os.path.isfile(fname)):
     df_idx = pd.read_csv(fname, sep=';') 
 else:
     print('Arquivo não existente. Produzindo-o')
-    df, data= make_dataframe(fname)
+    df, data, df_idx= make_dataframe(fname)
 
 # Visualizing the data 
 
