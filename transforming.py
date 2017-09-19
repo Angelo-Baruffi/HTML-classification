@@ -17,6 +17,8 @@ from nltk.corpus import stopwords
 from os import listdir
 from os.path import join
 from os import walk
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 #import os
 # os.chdir('c:\\Andrei\\HTML-classification')
 
@@ -42,7 +44,6 @@ def load():
         data[dirName] = f
     
     return data
-
 
 #%%cleaning data
 
@@ -71,10 +72,6 @@ def clean_texts(texts):
     df_ = df_.str.join(' ')
     # join the cleaned words in a list
     return df_ #Retorna um pandas com uma coluna com o texto de cada amostra filtrado
-
-  
-
-  
   
 #%% making a data frame
     
@@ -172,7 +169,62 @@ def make_dataframe(fname):
     df2.to_csv(fname, sep=';', encoding='utf-8')
     
     return df,data
+#%% Pega todas as features desejaveis e tranforca em elementos numericos para o classificador
+
+
+def find_nan(df, column):## Acha todos os index que possuem um nan como elemento
+    df_nan = df[column].notnull()
+    return df_nan[df_nan==False].index
+   
+def get_features_and_labels(df, cols, other=False, min_samples=10):
+    if(other):
+        df = df.copy()
+    else:
+        df = df.copy()[df['class']!='other'] #Não utilizaa classe outros
     
+    index_to_keep = set(df.index)
+    index_to_drop = set([])
+    
+    features = pd.DataFrame()
+    for column in columns:
+        if(column == 'all_text'):
+        
+            corpus = df.loc[:,column].dropna()
+            
+            n_samples = df.shape[0]
+            vectorizer = TfidfVectorizer(stop_words='english', max_df=0.9,min_df=min_samples/n_samples)
+            features_column = vectorizer.fit_transform(corpus)
+            features_column = pd.DataFrame(features_column.toarray())
+    
+            index_to_drop = index_to_drop | set(find_nan(df, column))
+            index_to_keep = index_to_keep - index_to_drop
+        
+        elif(type(df[column][0])==type('str') and column != 'all_text' or column == 'h3'):
+            corpus = df.loc[:,column].fillna('')
+            
+            n_samples = df.shape[0]
+            vectorizer = TfidfVectorizer(stop_words='english',max_df=0.9 , min_df=min_samples/n_samples)
+            features_column = vectorizer.fit_transform(corpus)
+            features_column = pd.DataFrame(features_column.toarray())
+            
+            
+        else:
+            features_column = df[column].fillna(0)
+        
+        # https://pandas.pydata.org/pandas-docs/stable/merging.html
+        # Documentação de como o concat funciona
+        features = pd.concat([features,features_column], axis=1)
+    
+    
+    features = features.loc[list(index_to_keep)].fillna(0)
+    features.sort_index(inplace=True)
+    
+    
+            
+    labels = df['class']
+    labels = labels.loc[list(index_to_keep)].sort_index()
+    
+    return features, labels
 
 
 
