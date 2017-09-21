@@ -13,25 +13,40 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.datasets import make_classification
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
+
+
 
 #%% Pré definições
-min_samples = 5.0 #numero minimo de vezes que uma palavra deve aparecer para ser considerada nos calculos
-columns = ['title', 'h2','a_count', 'img_count', 'li_count', 'hs_count', 'hs']
+min_samples = 1.0 #numero minimo de vezes que uma palavra deve aparecer para ser considerada nos calculos
+#columns = ['all_text','title', 'h2','a_count', 'img_count', 'li_count', 'hs_count', 'hs']
+columns = df.columns
 
-clas = {'Random Forest': RandomForestClassifier(n_estimators=600, min_samples_split=5,criterion='entropy'),
+clas = {#'Random Forest': RandomForestClassifier(n_estimators=600, min_samples_split=5,criterion='entropy'),
         'Naive Bayes': GaussianNB(),
 #        'SVM linear': SVC(kernel='linear'),
 #        'SVM': SVC(C=10),
-        'Neural Network': MLPClassifier(solver='lbfgs', alpha=1e-1, hidden_layer_sizes=(5, 2), random_state=0)
+        'Neural Network': MLPClassifier(solver='lbfgs', alpha=1e-2, hidden_layer_sizes=(4, 2), random_state=0)
         }
 
 
 
-#%% 
+#%% Pre processamento
+startTimePro = time.time()
 features, labels = get_features_and_labels(df, columns, min_samples=min_samples)
+print ('Time to pre process {}'.format(time.time() - startTimePro))
 
+startTimePCA = time.time()
 
-X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.4, random_state=0)
+pca = PCA(n_components=40)
+pca.fit(features)
+features = pca.transform(features)
+important_features = pca.explained_variance_ratio_
+
+print ('Time to PCA {}'.format(time.time() - startTimePCA))
+#%% Treino
+
+X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.3, random_state=0)
 
 result = pd.DataFrame(columns=['Classifier', 'Acc_train', 'Acc_test', 'time'])
 
