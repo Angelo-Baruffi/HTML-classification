@@ -11,6 +11,8 @@ import numpy as np
 import sys
 import re
 import time
+import itertools
+
 
 from nltk.stem.snowball  import SnowballStemmer
 from nltk.corpus import stopwords
@@ -176,7 +178,8 @@ def find_nan(df, column):## Acha todos os index que possuem um nan como elemento
     df_nan = df[column].notnull()
     return df_nan[df_nan==False].index
    
-def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_alltx=10, n_samples_staff=96, n_samples_cls=96):
+def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_alltx=10,
+                            n_samples_staff=96,n_samples_dep=127,  n_samples_cls=96):
     if(other):
         df = df.copy()
     else:
@@ -188,10 +191,11 @@ def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_
     df.sort_index(inplace=True)
     df = df.reset_index(drop=True) 
     
-    classes = set(df.values.T[0])-set(['staff'])
-    df_train = df[df['class']=='staff'].head(n_samples_staff)
+    classes = set(df.values.T[0])-set(['staff', 'department'])
+    df_train = df[df['class']=='staff'].sample(n_samples_staff)
+    df_train = df_train.append(df[df['class']=='department'].sample(n_samples_dep))
     for cl in list(classes):
-        df_train = df_train.append(df[df['class']==cl].head(n_samples_cls))
+        df_train = df_train.append(df[df['class']==cl].sample(n_samples_cls))
     
     df_test = df.loc[set(df.index)-set(df_train.index)].reset_index(drop=True) #DataFrame de teste
     
@@ -213,16 +217,16 @@ def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_
     
         
         elif(column == 'h3' or column== 'h1' or column=='a'or column=='h2'or column=='title'or column=='li' or column=='hs'):
-            corpus = df_test.loc[:,column].fillna('')
-            corpus_train = df_train.loc[:,column].fillna('')
+            corpus = df_train.loc[:,column].fillna('')
+            corpus_test = df_test.loc[:,column].fillna('')
 
             
-            n_samples = df_test.shape[0]
+            n_samples = df_train.shape[0]
             vectorizer = TfidfVectorizer(stop_words='english',max_df=0.9 , min_df=min_samples/n_samples)
             features_column = vectorizer.fit_transform(corpus)
             features_column = pd.DataFrame(features_column.toarray())
             
-            features_column_test = vectorizer.transform(corpus_train)
+            features_column_test = vectorizer.transform(corpus_test)
             features_column_test = pd.DataFrame(features_column_test.toarray())
             
             
@@ -249,7 +253,35 @@ def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_
 
 
     
-    
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
 
 
 
