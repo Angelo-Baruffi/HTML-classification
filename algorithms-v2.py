@@ -27,8 +27,9 @@ from sklearn.metrics import confusion_matrix
 #%% Pré definições
 min_samples = 50.0 #numero minimo de vezes que uma palavra deve aparecer para ser considerada nos calculos
 min_sample_alltx = 100.0 #numero minimo de palavras que devem aparecer no all_text
-n_components = 400 # Numero de features utilziadas após redução do PCA
-
+n_components = None # Numero de features utilziadas após redução do PCA
+n_samples_staff = 96 #Max is 135 - Numero de amostras da classe 'Staff' - Tem 137 elementos com dois nulos em all_text
+n_samples_cls = 200 # Numero de amostras das outras classes a serem utilizadas no treino
 '''
 Possiblidades como features:
  'class', 'all_text', 'all_text_count', 'title', 'title_count',
@@ -58,23 +59,25 @@ clas = {
         }
 
 
+
 #%% Pre processamento
 
 startTimePro = time.time()
-features, labels = get_features_and_labels(df, columns, min_samples=min_samples, min_sample_alltx=min_sample_alltx)
+X_train, X_test, y_train, y_test = get_features_and_labels(df, columns, False , min_samples,
+                                                           min_sample_alltx, n_samples_staff, n_samples_cls)
 print ('Time to pre process {}'.format(time.time() - startTimePro))
 
 startTimePCA = time.time()
 
 pca = PCA(n_components=n_components)
-pca.fit(features)
-features = pca.transform(features)
+pca.fit(X_train)
+X_train = pca.transform(X_train)
+X_test = pca.transform(X_test)
+
 important_features = pca.explained_variance_ratio_
 
 print ('Time to PCA {}'.format(time.time() - startTimePCA))
 #%% Treino
-
-X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.4, random_state=0)
 
 result = pd.DataFrame(columns=['Classifier', 'Acc_train', 'Acc_test', 'time'])
 

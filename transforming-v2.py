@@ -176,56 +176,75 @@ def find_nan(df, column):## Acha todos os index que possuem um nan como elemento
     df_nan = df[column].notnull()
     return df_nan[df_nan==False].index
    
-def get_features_and_labels(df, cols, other=False, min_samples=5, min_sample_alltx=10):
+def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_alltx=10, n_samples_staff=96, n_samples_cls=96):
     if(other):
         df = df.copy()
     else:
         df = df.copy()[df['class']!='other'] #Não utilizaa classe outros
     
-    index_to_keep = set(df.index)
-    index_to_drop = set([])
+    index_to_drop = set(find_nan(df, 'all_text'))
+    index_to_keep = set(df.index)-index_to_drop
+    df = df.loc[list(index_to_keep)] #Retira objetos com nan em all_text
+    df.sort_index(inplace=True)
+    df = df.reset_index(drop=True) 
     
-    features = pd.DataFrame()
+    classes = set(df.values.T[0])-set(['staff'])
+    df_train = df[df['class']=='staff'].head(n_samples_staff)
+    for cl in list(classes):
+        df_train = df_train.append(df[df['class']==cl].head(n_samples_cls))
+    
+    df_test = df.loc[set(df.index)-set(df_train.index)].reset_index(drop=True) #DataFrame de teste
+    
+    df_train = df_train.reset_index(drop=True) #DataFrame de treino
+
+    X_train = pd.DataFrame()
+    X_test  = pd.DataFrame()
+
     for column in columns:
         if(column == 'all_text'):
-        
-            corpus = df.loc[:,column].dropna()
-            
-            n_samples = df.shape[0]
+                    
+            n_samples = df_train.shape[0]
             vectorizer = TfidfVectorizer(stop_words='english', max_df=0.9,min_df=min_sample_alltx/n_samples)
-            features_column = vectorizer.fit_transform(corpus)
+            features_column = vectorizer.fit_transform(df_train[column])
             features_column = pd.DataFrame(features_column.toarray())
+            
+            features_column_test = vectorizer.transform(df_test[column])
+            features_column_test = pd.DataFrame(features_column_test.toarray())
     
-            index_to_drop = index_to_drop | set(find_nan(df, column))
-            index_to_keep = index_to_keep - index_to_drop
         
         elif(column == 'h3' or column== 'h1' or column=='a'or column=='h2'or column=='title'or column=='li' or column=='hs'):
-            corpus = df.loc[:,column].fillna('')
+            corpus = df_test.loc[:,column].fillna('')
+            corpus_train = df_train.loc[:,column].fillna('')
+
             
-            n_samples = df.shape[0]
+            n_samples = df_test.shape[0]
             vectorizer = TfidfVectorizer(stop_words='english',max_df=0.9 , min_df=min_samples/n_samples)
             features_column = vectorizer.fit_transform(corpus)
             features_column = pd.DataFrame(features_column.toarray())
             
+            features_column_test = vectorizer.transform(corpus_train)
+            features_column_test = pd.DataFrame(features_column_test.toarray())
+            
             
         else:
-            features_column = df[column].fillna(0)
+            features_column = df_train[column].fillna(0)
             features_column = (features_column-features_column.min())/(features_column.max()-features_column.min())
-        
+            
+            features_column_test = df_test[column].fillna(0)
+            features_column_test = (features_column_test-features_column.min())/(features_column.max()-features_column.min())
         # https://pandas.pydata.org/pandas-docs/stable/merging.html
         # Documentação de como o concat funciona
-        features = pd.concat([features,features_column], axis=1)
-    
-    
-    features = features.loc[list(index_to_keep)].fillna(0)
-    features.sort_index(inplace=True)
-    
+        X_train = pd.concat([X_train,features_column], axis=1)
+        X_test  = pd.concat([X_test,features_column_test], axis=1)
+        
+        X_train = X_train.fillna(0)
+        X_test  = X_test.fillna(0)
     
             
-    labels = df['class']
-    labels = labels.loc[list(index_to_keep)].sort_index()
+    y_train = df_train['class']
+    y_test = df_test['class']
     
-    return features, labels
+    return X_train, X_test, y_train, y_test
 
 
 
