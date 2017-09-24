@@ -30,7 +30,8 @@ min_sample_alltx = 10.0 #numero minimo de palavras que devem aparecer no all_tex
 n_components = 2000 # Numero de features utilziadas após redução do PCA
 n_samples_staff = 96 #Max é 135 - Numero de amostras da classe 'Staff' - Tem 137 elementos com dois nulos em all_text
 n_samples_dep = 127 #Max é 180 - Numero de amostras da classe 'Department'
-n_samples_cls = 200 # Numero de amostras das outras classes a serem utilizadas no treino
+n_samples_stu = 400 #Max é 1600 - Numero de amostras da classe 'Student'
+n_samples_cls = 300 # Numero de amostras das outras classes a serem utilizadas no treino
 '''
 Possiblidades como features:
  'class', 'all_text', 'all_text_count', 'title', 'title_count',
@@ -44,13 +45,13 @@ columns = [u'all_text', u'all_text_count', u'title', u'title_count',
        u'a_count', u'img_count', u'li', u'li_count', u'hs', u'hs_count']
 
 clas = {
-        'Random Forest': RandomForestClassifier(n_estimators=600, min_samples_split=20),
-        'ExtraTreesClassifier': ExtraTreesClassifier(min_samples_split=25, n_estimators=200),
+        'Random Forest': RandomForestClassifier(n_estimators=3000, min_samples_split=20),
+        'ExtraTreesClassifier': ExtraTreesClassifier(min_samples_split=20, n_estimators=3000),
 #        'Naive Bayes': GaussianNB(),
 #        'SVM linear': SVC(kernel='linear'),
 #        'SVM': SVC(C=1),
 #        'Decision Tree': DecisionTreeClassifier(min_samples_split=10), 
-#        'Neural Network': MLPClassifier(solver='lbfgs', alpha=1e-1, hidden_layer_sizes=(3000, 4), random_state=0),
+        'Neural Network': MLPClassifier(solver='lbfgs', alpha=1e-2, hidden_layer_sizes=(10000, 3), random_state=0),
 #        'Logistic Regression': LogisticRegressionCV( multi_class='ovr'),
 #        'KNeighbors': KNeighborsClassifier(),
 #        'AdaBoost': AdaBoostClassifier(n_estimators=300, learning_rate=0.5),
@@ -64,9 +65,14 @@ clas = {
 #%% Pre processamento
 
 startTimePro = time.time()
-X_train, X_test, y_train, y_test = get_features_and_labels(df, columns, False , min_samples,
-                                                           min_sample_alltx, n_samples_staff,
-                                                           n_samples_dep, n_samples_cls)
+X_train, X_test, y_train, y_test = get_features_and_labels(df, columns, False, 
+                                                           min_samples,
+                                                           min_sample_alltx,
+                                                           n_samples_staff,
+                                                           n_samples_dep,
+                                                           n_samples_stu,
+                                                           n_samples_cls)
+
 print ('Time to pre process {}'.format(time.time() - startTimePro))
 #%% PCA
 
@@ -84,9 +90,7 @@ print ('Time to pre process {}'.format(time.time() - startTimePro))
 
 result = pd.DataFrame(columns=['Classifier', 'Acc_train', 'Acc_test', 'time'])
 
-result2 = pd.DataFrame({'True': y_test})
-
-class_names = ['staff', 'department', 'project', 'course', 'student', 'faculty']
+class_names = ['staff', 'department', 'project', 'course', 'student', 'faculty', 'other']
 
 for cl in clas.keys():
     startTime2 = time.time()
@@ -105,18 +109,13 @@ for cl in clas.keys():
     result.index = result.index + 1
     result = result.sort_index()
     
-    result2['y_pred '+ cl] = y_pred
-    
-    plt.figure()
-    plot_confusion_matrix(confusion_matrix(y_test, y_pred), classes=class_names,
-                      title='Confusion matrix, without normalization')
-
-
-plt.show()
+#    
+#    plt.figure()
+#    plot_confusion_matrix(confusion_matrix(y_test, y_pred), normalize = True ,classes=class_names,
+#                      title='Confusion matrix, without normalization', cl = cl)
+#
+#
+#plt.show()
 
 print ('The script took {0} seconds !'.format(time.time() - startTime))
 print(result)
-
-col_re = result2.columns
-result2 = result2[result2[col_re[0]]!=result2[col_re[1]]]
-result2 = result2[result2[col_re[0]]!=result2[col_re[2]]]

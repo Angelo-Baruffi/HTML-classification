@@ -179,7 +179,7 @@ def find_nan(df, column):## Acha todos os index que possuem um nan como elemento
     return df_nan[df_nan==False].index
    
 def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_alltx=10,
-                            n_samples_staff=96,n_samples_dep=127,  n_samples_cls=96):
+                            n_samples_staff=96,n_samples_dep=127,  n_samples_stu=300, n_samples_cls=96):
     if(other):
         df = df.copy()
     else:
@@ -191,11 +191,14 @@ def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_
     df.sort_index(inplace=True)
     df = df.reset_index(drop=True) 
     
-    classes = set(df.values.T[0])-set(['staff', 'department'])
-    df_train = df[df['class']=='staff'].sample(n_samples_staff)
-    df_train = df_train.append(df[df['class']=='department'].sample(n_samples_dep))
+    
+    x = 100
+    classes = set(df.values.T[0])-set(['staff', 'department', 'student'])
+    df_train = df[df['class']=='staff'].sample(n_samples_staff, random_state=x)
+    df_train = df_train.append(df[df['class']=='department'].sample(n_samples_dep, random_state=x))
+    df_train = df_train.append(df[df['class']=='student'].sample(n_samples_stu, random_state=x))
     for cl in list(classes):
-        df_train = df_train.append(df[df['class']==cl].sample(n_samples_cls))
+        df_train = df_train.append(df[df['class']==cl].sample(n_samples_cls, random_state=x))
     
     df_test = df.loc[set(df.index)-set(df_train.index)].reset_index(drop=True) #DataFrame de teste
     
@@ -256,7 +259,8 @@ def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
-                          cmap=plt.cm.Blues):
+                          cmap=plt.cm.Blues,
+                          cl=''):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
@@ -265,7 +269,7 @@ def plot_confusion_matrix(cm, classes,
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
+    plt.title(title + ' in ' + cl)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
