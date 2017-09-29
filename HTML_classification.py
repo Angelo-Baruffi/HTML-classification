@@ -3,8 +3,11 @@
 Autores: Andrei Donati e Angelo Baruffi
 
 Reading, cleaning and saving/reading the data
+
+O objetivo desse arquivo é apenas carregar os dados caso não estejam carregados.
+Esses dados já estão limpos em um csv.
 """
-from transforming import *
+from funcs import *
 import os.path
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -13,7 +16,7 @@ import matplotlib.pyplot as plt
 df = pd.DataFrame()
 
 # Leitura dos dados, já limpos
-fname= 'data.csv'
+fname= 'data.csv' #Nome do arquivo
 
 if (os.path.isfile(fname)):
     print('Arquivo já existente. Abrindo-o')

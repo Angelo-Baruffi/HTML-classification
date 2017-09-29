@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 
-@author: angel
+Autores: Andrei Donati e Angelo Baruffi
+
+Esse arquivo apenas vizualiza a quantidade de elementos em cada classe
 """
 import matplotlib as mpl
 import matplotlib.pyplot as plt

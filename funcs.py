@@ -12,6 +12,7 @@ import sys
 import re
 import time
 import itertools
+import matplotlib.pyplot as plt
 
 
 from nltk.stem.snowball  import SnowballStemmer
@@ -33,7 +34,9 @@ sys.setrecursionlimit(10000)
 
 def load():
     '''
-        Função que faz a leitura dos htmls de todas as pastas 
+        Função que faz a leitura dos htmls de todas as pastas
+        Retorna um dict com o valor da chave igual a categoria do html e como valor um formato fácil
+        de processamento de HTML (BeautifulSoup)
     '''
     dirPath = '.\webkb' #Diretório com os dados
     classes = listdir(dirPath) # Lista de todas as classes
@@ -47,12 +50,12 @@ def load():
     
     return data
 
-#%%cleaning data
+#%% Cleaning data
 
 def clean_texts(texts):
     '''
         Função para fazer a limpeza dos dados. Retira bad words, aplica o algoritmo "stemmer"
-        retira pontuações e numeros
+        retira pontuações e números
     '''
 
     df_ = pd.Series(texts)
@@ -180,10 +183,14 @@ def find_nan(df, column):## Acha todos os index que possuem um nan como elemento
    
 def get_features_and_labels(df, columns, other=False, min_samples=5, min_sample_alltx=10,
                             n_samples_staff=96,n_samples_dep=127,  n_samples_stu=300, n_samples_cls=96):
+    """
+        Essa função transforma o dataframe pré limpo em um conjusto de teste e de treino.
+        As features são pré processadas pelo TFIDF e normalizadas.
+    """
     if(other):
         df = df.copy()
     else:
-        df = df.copy()[df['class']!='other'] #Não utilizaa classe outros
+        df = df.copy()[df['class']!='other'] #Não utiliza classe outros
     
     index_to_drop = set(find_nan(df, 'all_text'))
     index_to_keep = set(df.index)-index_to_drop

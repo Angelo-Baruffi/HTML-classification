@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 
-@author: Angelo Baruffi e Andrei Donati
+Autores: Andrei Donati e Angelo Baruffi
+
+Esse arquivo é voltado a fazer a mineração dos dados. Os dados já foram analisados e preparados.
+Os arquivos serão limpos e pré-processados pela função 'get_features_and_labels' já criada no arquivo funcs.py.
+Vários modelos foram importados do sklearn para tentar achar o melhor resultado para o problema. Muitos modelos
+tiveram ótimos resultados, se destacando o ExtraTreesClassifiere e o RandomForestClassifier.
 """
 startTime = time.time()
 
@@ -24,34 +29,36 @@ from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
 from sklearn.metrics import confusion_matrix
 
-#%% Pré definições
-min_samples = 5.0 #numero minimo de vezes que uma palavra deve aparecer para ser considerada nos calculos - 50
-min_sample_alltx = 10.0 #numero minimo de palavras que devem aparecer no all_text - 100
-n_components = 2000 # Numero de features utilziadas após redução do PCA
-n_samples_staff = 96 #Max é 135 - Numero de amostras da classe 'Staff' - Tem 137 elementos com dois nulos em all_text
-n_samples_dep = 127 #Max é 180 - Numero de amostras da classe 'Department'
-n_samples_stu = 400 #Max é 1600 - Numero de amostras da classe 'Student'
-n_samples_cls = 300 # Numero de amostras das outras classes a serem utilizadas no treino
+from funcs import * #Inporta funções definidas para limpeza e pré-processamento
+
+#%% Pré definições 
+
+min_samples = 5.0 #Número minimo de vezes que uma palavra deve aparecer para ser considerada nos cálculos
+min_sample_alltx = 10.0 #Número minimo de palavras que devem aparecer no all_text 
+n_components = None # Número de features utilziadas após redução do PCA
+n_samples_staff = 96 #Max é 135 - Número de amostras da classe 'Staff'
+n_samples_dep = 127 #Max é 180 - Número de amostras da classe 'Department'
+n_samples_stu = 400 #Max é 1600 - Número de amostras da classe 'Student'
+n_samples_cls = 300 # Número de amostras das outras classes a serem utilizadas no treino
 '''
 Possiblidades como features:
  'class', 'all_text', 'all_text_count', 'title', 'title_count',
  'h1', 'h1_count', 'h2', 'h2_count', 'h3', 'h3_count', 'a',
  'a_count', 'img_count', 'li', 'li_count', 'hs', 'hs_count'
 '''
-#columns = ['all_text','title', 'h2','a_count', 'img_count', 'li','li_count', 'hs_count', 'hs', 'a', 'h3']
 
 columns = [u'all_text', u'all_text_count', u'title', u'title_count',
        u'h1', u'h1_count', u'h2', u'h2_count', u'h3', u'h3_count', u'a',
        u'a_count', u'img_count', u'li', u'li_count', u'hs', u'hs_count']
 
 clas = {
-        'Random Forest': RandomForestClassifier(n_estimators=3000, min_samples_split=20),
-        'ExtraTreesClassifier': ExtraTreesClassifier(min_samples_split=20, n_estimators=3000),
+        'Random Forest': RandomForestClassifier(n_estimators=600, min_samples_split=20),
+        'ExtraTreesClassifier': ExtraTreesClassifier(min_samples_split=25, n_estimators=200),
 #        'Naive Bayes': GaussianNB(),
 #        'SVM linear': SVC(kernel='linear'),
 #        'SVM': SVC(C=1),
 #        'Decision Tree': DecisionTreeClassifier(min_samples_split=10), 
-        'Neural Network': MLPClassifier(solver='lbfgs', alpha=1e-2, hidden_layer_sizes=(10000, 3), random_state=0),
+#        'Neural Network': MLPClassifier(solver='lbfgs', alpha=1e-2, hidden_layer_sizes=(1000, 2), random_state=0),
 #        'Logistic Regression': LogisticRegressionCV( multi_class='ovr'),
 #        'KNeighbors': KNeighborsClassifier(),
 #        'AdaBoost': AdaBoostClassifier(n_estimators=300, learning_rate=0.5),
@@ -65,6 +72,7 @@ clas = {
 #%% Pre processamento
 
 startTimePro = time.time()
+
 X_train, X_test, y_train, y_test = get_features_and_labels(df, columns, False, 
                                                            min_samples,
                                                            min_sample_alltx,
@@ -74,7 +82,7 @@ X_train, X_test, y_train, y_test = get_features_and_labels(df, columns, False,
                                                            n_samples_cls)
 
 print ('Time to pre process {}'.format(time.time() - startTimePro))
-#%% PCA
+#%% PCA - Não está sendo utiliado no momento pois piorou os resultados.
 
 #startTimePCA = time.time()
 #
@@ -87,10 +95,17 @@ print ('Time to pre process {}'.format(time.time() - startTimePro))
 #print ('Time to PCA {}'.format(time.time() - startTimePCA))
 
 #%% Treino
+"""
+    É executado todos os modelos de classificação definidos no dict. Cada modelo é analisado e testado com a base de teste
+    e seus resultados são guardados no DataFrame result. Esse é mostrado ao final da execução, juntamente com as matrizes de
+    confusão.
+"""
 
 result = pd.DataFrame(columns=['Classifier', 'Acc_train', 'Acc_test', 'time'])
 
-class_names = ['staff', 'department', 'project', 'course', 'student', 'faculty', 'other']
+class_names = ['staff', 'department', 'project', 'course', 'student', 'faculty'
+#               ,'other'
+               ]
 
 for cl in clas.keys():
     startTime2 = time.time()
@@ -109,13 +124,13 @@ for cl in clas.keys():
     result.index = result.index + 1
     result = result.sort_index()
     
-#    
-#    plt.figure()
-#    plot_confusion_matrix(confusion_matrix(y_test, y_pred), normalize = True ,classes=class_names,
-#                      title='Confusion matrix, without normalization', cl = cl)
-#
-#
-#plt.show()
+    
+    plt.figure()
+    plot_confusion_matrix(confusion_matrix(y_test, y_pred), normalize = True ,classes=class_names,
+                      title='Confusion matrix, without normalization', cl = cl)
+
+
+plt.show()
 
 print ('The script took {0} seconds !'.format(time.time() - startTime))
 print(result)
