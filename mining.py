@@ -29,9 +29,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
 from sklearn.metrics import confusion_matrix
 
-from funcs import * #Inporta funções definidas para limpeza e pré-processamento
+from funcs import * #Importa funções definidas para limpeza e pré-processamento
 
-#%% Pré definições 
+
 
 min_samples = 5.0 #Número minimo de vezes que uma palavra deve aparecer para ser considerada nos cálculos
 min_sample_alltx = 10.0 #Número minimo de palavras que devem aparecer no all_text 
@@ -52,8 +52,8 @@ columns = [u'all_text', u'all_text_count', u'title', u'title_count',
        u'a_count', u'img_count', u'li', u'li_count', u'hs', u'hs_count']
 
 clas = {
-        'Random Forest': RandomForestClassifier(n_estimators=600, min_samples_split=20),
-        'ExtraTreesClassifier': ExtraTreesClassifier(min_samples_split=25, n_estimators=200),
+        'Random Forest': RandomForestClassifier(n_estimators=120, min_samples_split=20),
+        'ExtraTreesClassifier': ExtraTreesClassifier(min_samples_split=25, n_estimators=50),
 #        'Naive Bayes': GaussianNB(),
 #        'SVM linear': SVC(kernel='linear'),
 #        'SVM': SVC(C=1),
@@ -62,14 +62,15 @@ clas = {
 #        'Logistic Regression': LogisticRegressionCV( multi_class='ovr'),
 #        'KNeighbors': KNeighborsClassifier(),
 #        'AdaBoost': AdaBoostClassifier(n_estimators=300, learning_rate=0.5),
-#        'XGBoost': GradientBoostingClassifier(n_estimators=200, min_samples_split=100),
+         'XGBoost': GradientBoostingClassifier(n_estimators=150, min_samples_split=100, max_depth = 12, 
+                                               min_samples_leaf= 25, max_features="sqrt"  ),
 #        'Perceptron': Perceptron(),
 #        'RidgeClassifierCV': RidgeClassifierCV()
         }
 
 
 
-#%% Pre processamento
+
 
 startTimePro = time.time()
 
@@ -82,19 +83,7 @@ X_train, X_test, y_train, y_test = get_features_and_labels(df, columns, False,
                                                            n_samples_cls)
 
 print ('Time to pre process {}'.format(time.time() - startTimePro))
-#%% PCA - Não está sendo utiliado no momento pois piorou os resultados.
 
-#startTimePCA = time.time()
-#
-#pca = PCA(n_components=n_components)
-#pca.fit(X_train)
-#X_train = pca.transform(X_train)
-#X_test = pca.transform(X_test)
-#
-#important_features = pca.explained_variance_ratio_
-#print ('Time to PCA {}'.format(time.time() - startTimePCA))
-
-#%% Treino
 """
     É executado todos os modelos de classificação definidos no dict. Cada modelo é analisado e testado com a base de teste
     e seus resultados são guardados no DataFrame result. Esse é mostrado ao final da execução, juntamente com as matrizes de

@@ -11,6 +11,8 @@ from funcs import *
 import os.path
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+import pandas as pd
 
 
 df = pd.DataFrame()
@@ -30,4 +32,17 @@ df = df.copy().iloc[:,1:19]
 # Visualizing the data 
 
 print('Número total de exemplos: {}'.format(str(len(df))))
+plt2 = df['class'].value_counts()
+plt2.plot(kind='bar')
+print(plt2.describe())
+plt.show()
+
+
+plt2 = df[df['class']!='other']['class'].value_counts()
+plt2.plot(kind='bar')
+print(plt2.describe())
+plt.show()
+
+
+
 

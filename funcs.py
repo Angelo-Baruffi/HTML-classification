@@ -30,7 +30,7 @@ stemmer = SnowballStemmer("english") # Choose a language
 global tag
 sys.setrecursionlimit(10000)
 
-#%% Loading data
+
 
 def load():
     '''
@@ -50,7 +50,6 @@ def load():
     
     return data
 
-#%% Cleaning data
 
 def clean_texts(texts):
     '''
@@ -78,8 +77,7 @@ def clean_texts(texts):
     # join the cleaned words in a list
     return df_ #Retorna um pandas com uma coluna com o texto de cada amostra filtrado
   
-#%% making a data frame
-    
+
 count_all_tag = lambda x: pd.DataFrame(x.findAll(tag))
 
 def find_all_tag(x):
@@ -174,7 +172,6 @@ def make_dataframe(fname):
     df2.to_csv(fname, sep=';', encoding='utf-8')
     
     return df,data
-#%% Pega todas as features desejaveis e tranforca em elementos numericos para o classificador
 
 
 def find_nan(df, column):## Acha todos os index que possuem um nan como elemento
